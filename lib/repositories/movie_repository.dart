@@ -1,16 +1,13 @@
-import 'package:movieapp/services/tmdb_service.dart';
-
-import 'package:movieapp/models/movie.dart';
-import 'package:movieapp/utils/movie_category.dart';
+// lib/repositories/movie_repository.dart
+import 'package:movieapp/models/movie_model.dart';
 import 'package:movieapp/services/i_movie_service.dart';
+import 'package:movieapp/utils/movie_category.dart';
 
 class MovieRepository {
-  final IMovieService _service;
+  final IMovieService service;
+  MovieRepository({required this.service});
 
-  MovieRepository({IMovieService? service})
-    : _service = service ?? TMDBService();
-
-  Future<List<Movie>> fetchMovies(MovieCategory category) {
-    return _service.fetchMovies(category);
+  Future<List<MovieModel>> getMovies(MovieCategory category) async {
+    return service.fetchMovies(category);
   }
 }

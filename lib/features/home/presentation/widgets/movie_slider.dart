@@ -4,7 +4,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:movieapp/features/home/providers/movie_provider.dart';
+
+// ✅ MovieModel import
+import 'package:movieapp/models/movie_model.dart';
+
+// ✅ Doğrudan ViewModel provider import
+import 'package:movieapp/viewmodels/movie_viewmodel.dart';
 
 class MovieSlider extends ConsumerStatefulWidget {
   const MovieSlider({super.key});
@@ -17,7 +22,6 @@ class _MovieSliderState extends ConsumerState<MovieSlider> {
   final CarouselSliderController _controller = CarouselSliderController();
   int _current = 0;
 
-  // Yardımcı: TMDB path normalize
   String _normalizePath(String value) {
     if (value.isEmpty) return '';
     return value.startsWith('/') ? value : '/$value';
@@ -28,10 +32,9 @@ class _MovieSliderState extends ConsumerState<MovieSlider> {
     final moviesAsync = ref.watch(movieViewModelProvider);
 
     return moviesAsync.when(
-      data: (movies) {
+      data: (List<MovieModel> movies) {
         if (movies.isEmpty) return const SizedBox.shrink();
 
-        // Maksimum 5 film göster
         final int count = math.min(movies.length, 5);
 
         return Column(
@@ -50,7 +53,6 @@ class _MovieSliderState extends ConsumerState<MovieSlider> {
                 onPageChanged: (index, reason) {
                   setState(() => _current = index);
 
-                  // Basit prefetch: bir sonraki görseli önceden ısıt
                   final nextIndex = (index + 1) % count;
                   final nextPoster = _normalizePath(
                     movies[nextIndex].posterPath,
@@ -72,7 +74,6 @@ class _MovieSliderState extends ConsumerState<MovieSlider> {
                 final fallbackUrl = backdropPath.isNotEmpty
                     ? 'https://image.tmdb.org/t/p/w500$backdropPath'
                     : '';
-
                 return GestureDetector(
                   onTap: () {
                     debugPrint('Tapped movie: ${movie.id} — ${movie.title}');
@@ -115,8 +116,6 @@ class _MovieSliderState extends ConsumerState<MovieSlider> {
                             )
                           else
                             const _ImageErrorFallback(),
-
-                          // Gradient + başlık
                           Align(
                             alignment: Alignment.bottomCenter,
                             child: Container(
@@ -154,7 +153,6 @@ class _MovieSliderState extends ConsumerState<MovieSlider> {
               },
             ),
             const SizedBox(height: 10),
-            // Dot indicator
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(count, (i) {
@@ -170,7 +168,7 @@ class _MovieSliderState extends ConsumerState<MovieSlider> {
                     decoration: BoxDecoration(
                       color: isActive
                           ? Colors.white
-                          : Colors.white.withOpacity(0.45),
+                          : Colors.white.withValues(alpha: 0.45),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
